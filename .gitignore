@@ -177,3 +177,6 @@ pyrightconfig.json
 
 # Results Folder
 /results
+
+# VS Code
+.vscode
