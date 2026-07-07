@@ -93,7 +93,7 @@ class ClassicalPINN(nn.Module):
         @type first_omega_0: float
         @param hidden_omega_0: Omega scaling for subsequent SIREN layers.
         @type hidden_omega_0: float
-        @param hard_ic_ansatz: If True, enforce ICs via u = E(x,t) + t^2 * NN (Fix 4).
+        @param hard_ic_ansatz: If True, enforce ICs via u = E(x,t) + t^2 * (1 - t)^2 * NN(x, t) (Fix 4).
         @type hard_ic_ansatz: bool
 
         @return: None.
@@ -134,7 +134,7 @@ class ClassicalPINN(nn.Module):
         Predict u(x, t) by concatenating spatial and temporal inputs and passing them through the network.
 
         With hard_ic_ansatz=True:
-            u(x,t) = sin(2*pi*x - 2*pi*t) + t^2 * NN(x,t)
+            u(x,t) = sin(2*pi*x - 2*pi*t) + t^2 * (1 - t)^2  * NN(x,t)
         so u(x,0) and u_t(x,0) match the exact wave ICs by construction.
 
         @param x: Spatial input coordinates.
@@ -150,7 +150,6 @@ class ClassicalPINN(nn.Module):
 
         if self.hard_ic_ansatz:
             particular = torch.sin(TWO_PI * x - TWO_PI * t)
-            return particular + (t ** 2) * nn_out
+            return particular + (t ** 2) * (1 - t)**2 * nn_out
 
         return nn_out
-
