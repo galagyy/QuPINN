@@ -1,14 +1,14 @@
 """
 @file exact_solution.py
 @date 7-5-2026
-@version 0.1.0
+@version 0.1.1
 @author Saumil Sharma and Om Kasar
 
 Responsible for providing the analytical benchmark for the 1D wave equation:
 
-`E(x, t) = sin(2*pi*x - 2*pi*t) where Omega = [0, 1] x [0, 1]`
+`E(x, t) = sin(5*pi*x)*cos(5*pi*t) + 2*sin(7*pi*x)*cos(7*pi*t) where x ∈ [0, 1], t ∈ [0, 1]`
 
-which is derived from the general solution `E0*sin(kx - w*t)` with E0 = 1, wavelength
+which is derived from the general solution `SUM(E0sin(k_n * x)cos(w_n * t))` with E0 = 1, wavelength
 lamba = 1 (=> k = 2*pi) and the dispersion relation w = c*k = k in normalized units of
 of `c = 1`.
 """
@@ -20,11 +20,13 @@ import argparse
 import numpy as np
 import torch
 
-TWO_PI = 2.0 * np.pi
+# Set constants for used multiples of pi
+FIVE_PI = 5.0 * np.pi
+SEVEN_PI = 7.0 * np.pi
 
 def exact_solution_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     """
-    Evaluate the exact wave-equation solution E(x, t) = sin(2*pi*x - 2*pi*t).
+    Evaluate the exact wave-equation solution E(x, t) = sin(5*pi*x)*cos(5*pi*t) + 2*sin(7*pi*x)*cos(7*pi*t).
 
     @param x: Spatial coordinates on the domain [0, 1].
     @type x: torch.Tensor
@@ -34,11 +36,11 @@ def exact_solution_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     @return: Exact solution values at each (x, t) pair.
     @rtype: torch.Tensor
     """
-    return torch.sin(TWO_PI * x - TWO_PI * t)
+    return torch.sin(FIVE_PI * x) * torch.cos(FIVE_PI * t) + 2 * torch.sin(SEVEN_PI * x) * torch.cos(SEVEN_PI * t)
 
 def exact_solution_numpy(x: np.ndarray, t: np.ndarray) -> np.ndarray:
     """
-    Evaluate the exact wave-equation solution E(x, t) = sin(2*pi*x - 2*pi*t) in NumPy.
+    Evaluate the exact wave-equation solution E(x, t) = sin(5*pi*x)*cos(5*pi*t) + 2*sin(7*pi*x)*cos(7*pi*t) in NumPy.
 
     @param x: Spatial coordinates on the domain [0, 1].
     @type x: np.ndarray
@@ -48,7 +50,7 @@ def exact_solution_numpy(x: np.ndarray, t: np.ndarray) -> np.ndarray:
     @return: Exact solution values at each (x, t) pair.
     @rtype: np.ndarray
     """
-    return np.sin(TWO_PI * x - TWO_PI * t)
+    return np.sin(FIVE_PI * x) * np.cos(FIVE_PI * t) + 2 * np.sin(SEVEN_PI * x) * np.cos(SEVEN_PI * t)
 
 def dExact_dx_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     """
@@ -62,7 +64,7 @@ def dExact_dx_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     @return: Spatial derivative values at each (x, t) pair.
     @rtype: torch.Tensor
     """
-    return TWO_PI * torch.cos(TWO_PI * x - TWO_PI * t)
+    return (FIVE_PI * torch.cos(FIVE_PI * x) * torch.cos(FIVE_PI * t) + 2.0 * SEVEN_PI * torch.cos(SEVEN_PI * x) * torch.cos(SEVEN_PI * t))
 
 def dExact_dt_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     """
@@ -76,7 +78,7 @@ def dExact_dt_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     @return: Temporal derivative values at each (x, t) pair.
     @rtype: torch.Tensor
     """
-    return -TWO_PI * torch.cos(TWO_PI * x - TWO_PI * t)
+    return (-FIVE_PI * np.sin(FIVE_PI * x) * np.sin(FIVE_PI * t) - 2.0 * SEVEN_PI * np.sin(SEVEN_PI * x) * np.sin(SEVEN_PI * t))
 
 def sample_interior(n: int, device = None, generator = None) -> tuple[torch.Tensor, torch.Tensor]:
     """
