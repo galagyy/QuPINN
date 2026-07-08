@@ -12,15 +12,8 @@ they remain differentiable during optimizations.
 """
 
 from __future__ import annotations
-
 import torch
-
-from src.common.exact_solution import (
-    dExact_dt_torch,
-    dExact_dx_torch,
-    exact_solution_torch,
-)
-
+from src.common.exact_solution import exact_solution_torch
 from src.common.training_utils import LossWeights
 
 def _grad(outputs: torch.Tensor, inputs: torch.Tensor) -> torch.Tensor:
@@ -159,7 +152,7 @@ def loss_ic_mse(model, x0: torch.Tensor) -> torch.Tensor:
 
     return torch.mean((u0 - e0) ** 2)
 
-def loss_velocity_ic(model, x0: torch.Tensor, use_paper_literal: bool = False) -> torch.Tensor:
+def loss_velocity_ic(model, x0: torch.Tensor) -> torch.Tensor:
     """
     Penalize mismatch between du/dt at t = 0 and the analytical initial velocity.
 
@@ -179,16 +172,11 @@ def loss_velocity_ic(model, x0: torch.Tensor, use_paper_literal: bool = False) -
     u0 = model(x0, t0)
     u_t0 = _grad(u0, t0)
 
-    if use_paper_literal:
-        target = dExact_dx_torch(x0, t0)
-    else:
-        target = dExact_dt_torch(x0, t0)
+    return torch.mean((u_t0) ** 2)
 
-    return torch.mean((u_t0 - target) ** 2)
-
-def loss_boundary_value(model, t: torch.Tensor) -> torch.Tensor:
+def loss_lower_boundary(model, t: torch.Tensor) -> torch.Tensor:
     """
-    Enforce periodic boundary values by matching u(0, t) to u(1, t).
+    Enforce the first periodic boundary condition by verifying u(0, t) = 0 for all collocation points.
 
     @param model: PINN model exposing forward(x, t) -> u.
     @type model: torch.nn.Module
@@ -199,16 +187,14 @@ def loss_boundary_value(model, t: torch.Tensor) -> torch.Tensor:
     @rtype: torch.Tensor
     """
     x0 = torch.zeros_like(t)
-    x1 = torch.ones_like(t)
 
     u0 = model(x0, t)
-    u1 = model(x1, t)
 
-    return torch.mean((u0 - u1) ** 2)
+    return torch.mean((u0) ** 2)
 
-def loss_boundary_derivative(model, t: torch.Tensor) -> torch.Tensor:
+def loss_upper_boundary(model, t: torch.Tensor) -> torch.Tensor:
     """
-    Enforce periodic boundary derivatives by matching du/dx at x = 0 and x = 1.
+    Enforce the second periodic boundary condition by verifying u(1, t) = 0 for all collocation points.
 
     @param model: PINN model exposing forward(x, t) -> u.
     @type model: torch.nn.Module
@@ -218,16 +204,11 @@ def loss_boundary_derivative(model, t: torch.Tensor) -> torch.Tensor:
     @return: Scalar boundary-derivative MSE loss.
     @rtype: torch.Tensor
     """
-    x0 = torch.zeros_like(t).requires_grad_(True)
-    x1 = torch.ones_like(t).requires_grad_(True)
+    x1 = torch.ones_like(t)
 
-    u0 = model(x0, t)
     u1 = model(x1, t)
 
-    u0_x = _grad(u0, x0)
-    u1_x = _grad(u1, x1)
-
-    return torch.mean((u0_x - u1_x) ** 2)
+    return torch.mean((u1) ** 2)
 
 def total_loss(
     model,
@@ -291,8 +272,8 @@ def total_loss(
         l_mse = loss_ic_mse(model, x_ic)
         l_v = loss_velocity_ic(model, x_ic, use_paper_literal=use_paper_literal_velocity)
 
-    l_b1 = loss_boundary_value(model, t_bc)
-    l_b2 = loss_boundary_derivative(model, t_bc)
+    l_b1 = loss_lower_boundary(model, t_bc)
+    l_b2 = loss_upper_boundary(model, t_bc)
 
     total = (
         weights.pde * l_pde
