@@ -16,7 +16,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from src.common.exact_solution import TWO_PI
+from src.common.exact_solution import FIVE_PI, SEVEN_PI
 
 def _init_siren_linear(
     linear: nn.Linear,
@@ -73,7 +73,7 @@ class SineLayer(nn.Module):
 class ClassicalPINN(nn.Module):
     def __init__(
             self,
-            hidden_features: int = 64,
+            hidden_features: int = 32,
             hidden_layers: int = 4,
             activation: str = "siren",
             first_omega_0: float = 30.0,
@@ -148,8 +148,9 @@ class ClassicalPINN(nn.Module):
         xt = torch.cat([x, t], dim=-1)
         nn_out = self.net(xt)
 
+        #TODO: Edit appropriate ansatz ic normalizer
         if self.hard_ic_ansatz:
-            particular = torch.sin(TWO_PI * x - TWO_PI * t)
-            return particular + (t ** 2) * (1 - t)**2 * nn_out
+            particular = torch.sin(FIVE_PI * x) * torch.cos(FIVE_PI * t) + 2 * torch.sin(SEVEN_PI * x) * torch.cos(SEVEN_PI * t)
+            return particular + t**2 * (1 - t)**2 * nn_out
 
         return nn_out
