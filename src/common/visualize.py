@@ -32,15 +32,18 @@ def plot_exact_heatmap(X: np.ndarray, T: np.ndarray, E: np.ndarray, save_path: s
     @rtype: None
     """
     fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.pcolormesh(X, T, E, cmap="RdBu_r", vmin = -1, vmax = 1, shading = "auto")
+    v = float(np.max(np.abs(E)))
+    im = ax.pcolormesh(X, T, E, cmap="RdBu_r", vmin=-v, vmax=v, shading="auto")
 
-    ax.set_title(r"Exact Solution: $E(x, t)=E_0\sin(kn-\omega t)")
+    ax.set_title(
+        r"Exact Solution: $E(x,t)=\sin(5\pi x)\cos(5\pi t)+2\sin(7\pi x)\cos(7\pi t)$"
+    )
     ax.set_xlabel("x (normalized)")
     ax.set_ylabel("t (normalized)")
 
-    fig.colorbar(im, ax = ax, label = "E(x,t)")
+    fig.colorbar(im, ax=ax, label="E(x,t)")
     fig.tight_layout()
-    fig.savefig(save_path, dpi = 150)
+    fig.savefig(save_path, dpi=150)
 
     plt.close(fig)
 
@@ -90,15 +93,16 @@ def plot_prediction_heatmap(model, save_path: str, title: str = "Predicted u(x,t
     X, T, U = _model_grid(model, device=device)
 
     fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.pcolormesh(X, T, U, cmap="RdBu_r", vmin=-1, vmax=1, shading="auto")
+    v = float(np.max(np.abs(U)))
+    im = ax.pcolormesh(X, T, U, cmap="RdBu_r", vmin=-v, vmax=v, shading="auto")
 
     ax.set_xlabel("x (normalized)")
     ax.set_ylabel("t (normalized)")
     ax.set_title(title)
 
-    fig.colorbar(im, ax = ax, label = "u(x,t)")
+    fig.colorbar(im, ax=ax, label="u(x,t)")
     fig.tight_layout()
-    fig.savefig(save_path, dpi = 150)
+    fig.savefig(save_path, dpi=150)
 
     plt.close(fig)
 
@@ -159,6 +163,8 @@ def plot_snapshots(model, save_path: str, times = (0.25, 0.5, 0.75), device = No
     x_t = torch.tensor(xs, dtype=torch.float32, device=device).reshape(-1, 1)
 
     fig, axes = plt.subplots(1, len(times), figsize=(4 * len(times), 3.5), sharey=True)
+    if len(times) == 1:
+        axes = [axes]
     for col, tv in enumerate(times):
         t_t = torch.full_like(x_t, tv)
         exact = exact_solution_numpy(xs, np.full_like(xs, tv))
@@ -170,7 +176,7 @@ def plot_snapshots(model, save_path: str, times = (0.25, 0.5, 0.75), device = No
         axes[col].plot(xs, u, "r--", label="Prediction")
         axes[col].set_title(f"t = {tv:.2f}")
         axes[col].set_xlabel("x")
-        axes[col].set_ylim(-1.2, 1.2)
+        axes[col].set_ylim(-3.2, 3.2)
 
     axes[0].set_ylabel("u(x,t)")
 

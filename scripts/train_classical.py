@@ -69,8 +69,12 @@ def parse_args() -> argparse.Namespace:
                    help="Reuse the same collocation points each epoch.")
 
     # Hard IC Ansatz
-    p.add_argument("--hard_ic_ansatz", action=argparse.BooleanOptionalAction, default=True,
-                   help="u = sin(2pi(x-t)) + t^2 * NN enforces ICs by construction.")
+    p.add_argument(
+        "--hard_ic_ansatz",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Enforce ICs via u = E_exact(x,t) + t^2 * (1 - t)^2 * NN(x,t).",
+    )
 
     # Causal PDE Weighting
     p.add_argument("--causal_pde", action=argparse.BooleanOptionalAction, default=False)

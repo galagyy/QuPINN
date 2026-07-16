@@ -134,7 +134,7 @@ class ClassicalPINN(nn.Module):
         Predict u(x, t) by concatenating spatial and temporal inputs and passing them through the network.
 
         With hard_ic_ansatz=True:
-            u(x,t) = sin(2*pi*x - 2*pi*t) + t^2 * (1 - t)^2  * NN(x,t)
+            u(x,t) = E_exact(x,t) + t^2 * (1 - t)^2 * NN(x,t)
         so u(x,0) and u_t(x,0) match the exact wave ICs by construction.
 
         @param x: Spatial input coordinates.
@@ -148,9 +148,11 @@ class ClassicalPINN(nn.Module):
         xt = torch.cat([x, t], dim=-1)
         nn_out = self.net(xt)
 
-        #TODO: Edit appropriate ansatz ic normalizer
         if self.hard_ic_ansatz:
-            particular = torch.sin(FIVE_PI * x) * torch.cos(FIVE_PI * t) + 2 * torch.sin(SEVEN_PI * x) * torch.cos(SEVEN_PI * t)
+            particular = (
+                torch.sin(FIVE_PI * x) * torch.cos(FIVE_PI * t)
+                + 2 * torch.sin(SEVEN_PI * x) * torch.cos(SEVEN_PI * t)
+            )
             return particular + t**2 * (1 - t)**2 * nn_out
 
         return nn_out

@@ -163,9 +163,10 @@ class LearningRateAnnealing:
                 retain_graph=True,
                 allow_unused=True,
             )
-            mean_grad = sum(
-                g.abs().mean().item() for g in grads if g is not None
-            ) / max(len(params), 1)
+            valid_grads = [g for g in grads if g is not None]
+            if not valid_grads:
+                continue
+            mean_grad = sum(g.abs().mean().item() for g in valid_grads) / len(valid_grads)
             if mean_grad < 1e-12:
                 continue
             lambda_hat = self._clamp(

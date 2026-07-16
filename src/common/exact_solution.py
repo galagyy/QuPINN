@@ -78,7 +78,10 @@ def dExact_dt_torch(x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
     @return: Temporal derivative values at each (x, t) pair.
     @rtype: torch.Tensor
     """
-    return (-FIVE_PI * np.sin(FIVE_PI * x) * np.sin(FIVE_PI * t) - 2.0 * SEVEN_PI * np.sin(SEVEN_PI * x) * np.sin(SEVEN_PI * t))
+    return (
+        -FIVE_PI * torch.sin(FIVE_PI * x) * torch.sin(FIVE_PI * t)
+        - 2.0 * SEVEN_PI * torch.sin(SEVEN_PI * x) * torch.sin(SEVEN_PI * t)
+    )
 
 def sample_interior(n: int, device = None, generator = None) -> tuple[torch.Tensor, torch.Tensor]:
     """

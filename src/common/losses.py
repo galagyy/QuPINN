@@ -13,7 +13,11 @@ they remain differentiable during optimizations.
 
 from __future__ import annotations
 import torch
-from src.common.exact_solution import exact_solution_torch
+from src.common.exact_solution import (
+    dExact_dt_torch,
+    dExact_dx_torch,
+    exact_solution_torch,
+)
 from src.common.training_utils import LossWeights
 
 def _grad(outputs: torch.Tensor, inputs: torch.Tensor) -> torch.Tensor:
@@ -152,7 +156,7 @@ def loss_ic_mse(model, x0: torch.Tensor) -> torch.Tensor:
 
     return torch.mean((u0 - e0) ** 2)
 
-def loss_velocity_ic(model, x0: torch.Tensor) -> torch.Tensor:
+def loss_velocity_ic(model, x0: torch.Tensor, use_paper_literal: bool = False) -> torch.Tensor:
     """
     Penalize mismatch between du/dt at t = 0 and the analytical initial velocity.
 
@@ -172,7 +176,12 @@ def loss_velocity_ic(model, x0: torch.Tensor) -> torch.Tensor:
     u0 = model(x0, t0)
     u_t0 = _grad(u0, t0)
 
-    return torch.mean((u_t0) ** 2)
+    if use_paper_literal:
+        target = dExact_dx_torch(x0, t0)
+    else:
+        target = dExact_dt_torch(x0, t0)
+
+    return torch.mean((u_t0 - target) ** 2)
 
 def loss_lower_boundary(model, t: torch.Tensor) -> torch.Tensor:
     """
