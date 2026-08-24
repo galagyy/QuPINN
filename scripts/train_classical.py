@@ -6,7 +6,7 @@
 Utility script to train the classical PINN with stabilized training defaults.
 
 Usage:
-> python scripts/train_classical.py --epochs 8000 --lbfgs
+> python -m scripts.train_classical --epochs 8000 --lbfgs
 """
 
 from __future__ import annotations
@@ -193,7 +193,7 @@ def main() -> None:
         if not torch.isfinite(losses["total"]) or _has_nan_params(model):
             print(f"\n[ERROR] NaN/Inf detected at epoch {epoch}. Stopping early.")
             print("[HINT] Try: --no-lra --no-causal_pde --grad_clip 0.5 --lr 5e-5")
-            break
+            return
 
         for k, v in losses.items():
             history[k].append(v.item())
