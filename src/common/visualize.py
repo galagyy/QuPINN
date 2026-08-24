@@ -14,23 +14,23 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
-
-def plot_exact_heatmap(X: np.ndarray, T: np.ndarray, E: np.ndarray, save_path: str) -> None:
+def plot_exact_heatmap(save_path: str) -> None:
     """
     Save a heatmap of the exact benchmark solution E(x, t).
 
-    @param X: Spatial meshgrid coordinates.
-    @type X: np.ndarray
-    @param T: Temporal meshgrid coordinates.
-    @type T: np.ndarray
-    @param E: Exact solution values on the meshgrid.
-    @type E: np.ndarray
     @param save_path: Output file path for the saved figure.
     @type save_path: str
 
-    @return: None.
+    @return: None
     @rtype: None
     """
+    x = np.linspace(0, 1, 512)
+    t = np.linspace(0, 1, 512)
+    X, T = np.meshgrid(x, t)
+
+    # Plot exact solution for comparison
+    E = np.sin(5 * np.pi * X) * np.cos(5 * np.pi * T) + 2 * np.sin(7 * np.pi * X) * np.cos(7 * np.pi * T)
+
     fig, ax = plt.subplots(figsize=(6, 5))
     v = float(np.max(np.abs(E)))
     im = ax.pcolormesh(X, T, E, cmap="RdBu_r", vmin=-v, vmax=v, shading="auto")

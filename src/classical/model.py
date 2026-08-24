@@ -73,9 +73,9 @@ class SineLayer(nn.Module):
 class ClassicalPINN(nn.Module):
     def __init__(
             self,
-            hidden_features: int = 32,
-            hidden_layers: int = 4,
-            activation: str = "siren",
+            hidden_features: int = 128,
+            hidden_layers: int = 1,
+            activation: str = "tanh",
             first_omega_0: float = 30.0,
             hidden_omega_0: float = 30.0,
             hard_ic_ansatz: bool = True,
@@ -149,10 +149,7 @@ class ClassicalPINN(nn.Module):
         nn_out = self.net(xt)
 
         if self.hard_ic_ansatz:
-            particular = (
-                torch.sin(FIVE_PI * x) * torch.cos(FIVE_PI * t)
-                + 2 * torch.sin(SEVEN_PI * x) * torch.cos(SEVEN_PI * t)
-            )
-            return particular + t**2 * (1 - t)**2 * nn_out
+            initial = torch.sin(FIVE_PI * x) + 2 * torch.sin(SEVEN_PI * x)
+            return initial + t**2 * (1 - t) ** 2 * nn_out
 
         return nn_out
