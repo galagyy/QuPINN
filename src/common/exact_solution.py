@@ -162,9 +162,6 @@ if __name__ == "__main__":
         from src.common.utils import ensure_dir
         from src.common.visualize import plot_exact_heatmap
 
-        X, T = grid()
-        E = exact_solution_numpy(X, T)
-
         ensure_dir("outputs")
-        plot_exact_heatmap(X, T, E, save_path="outputs/exact_heatmap.png")
+        plot_exact_heatmap(save_path="outputs/exact_heatmap.png")
         print("[INFO] Saved outputs/exact_heatmap.png")

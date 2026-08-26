@@ -100,7 +100,7 @@ def loss_pde_causal(
     @rtype: torch.Tensor
     """
     residual = _pde_residual(model, x, t)
-    residual_sq = residual.contiguous().view(-1)
+    residual_sq = (residual ** 2).contiguous().view(-1)
 
     # Column slices like samples[:, 1:2] are non-contiguous; flatten() does not copy.
     t_flat = t.detach().contiguous().view(-1)
