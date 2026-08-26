@@ -35,6 +35,13 @@ def _init_siren_linear(
             linear.bias.uniform_(-bound, bound)
 
 
+def _init_xavier_linear(linear: nn.Linear) -> None:
+    """Initialize a standard activation layer with Xavier uniform weights."""
+    nn.init.xavier_uniform_(linear.weight)
+    if linear.bias is not None:
+        nn.init.zeros_(linear.bias)
+
+
 class SineLayer(nn.Module):
     def __init__(self, in_features: int, out_features: int, is_first: bool = False, omega_0: float = 30.0):
         """
@@ -73,9 +80,9 @@ class SineLayer(nn.Module):
 class ClassicalPINN(nn.Module):
     def __init__(
             self,
-            hidden_features: int = 128,
-            hidden_layers: int = 1,
-            activation: str = "tanh",
+            hidden_features: int = 32,
+            hidden_layers: int = 4,
+            activation: str = "siren",
             first_omega_0: float = 30.0,
             hidden_omega_0: float = 30.0,
             hard_ic_ansatz: bool = True,
@@ -117,12 +124,18 @@ class ClassicalPINN(nn.Module):
 
         elif activation in ("tanh", "relu"):
             act_cls = nn.Tanh if activation == "tanh" else nn.ReLU
-            layers: list[nn.Module] = [nn.Linear(2, hidden_features), act_cls()]
+            input_layer = nn.Linear(2, hidden_features)
+            _init_xavier_linear(input_layer)
+            layers: list[nn.Module] = [input_layer, act_cls()]
 
             for _ in range(hidden_layers - 1):
-                layers += [nn.Linear(hidden_features, hidden_features), act_cls()]
+                hidden_layer = nn.Linear(hidden_features, hidden_features)
+                _init_xavier_linear(hidden_layer)
+                layers += [hidden_layer, act_cls()]
 
-            layers.append(nn.Linear(hidden_features, 1))
+            output_layer = nn.Linear(hidden_features, 1)
+            _init_xavier_linear(output_layer)
+            layers.append(output_layer)
             self.net = nn.Sequential(*layers)
 
         else:
@@ -149,7 +162,10 @@ class ClassicalPINN(nn.Module):
         nn_out = self.net(xt)
 
         if self.hard_ic_ansatz:
-            initial = torch.sin(FIVE_PI * x) + 2 * torch.sin(SEVEN_PI * x)
-            return initial + t**2 * (1 - t) ** 2 * nn_out
+            particular = (
+                torch.sin(FIVE_PI * x) * torch.cos(FIVE_PI * t)
+                + 2 * torch.sin(SEVEN_PI * x) * torch.cos(SEVEN_PI * t)
+            )
+            return particular + t**2 * (1 - t)**2 * nn_out
 
         return nn_out

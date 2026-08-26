@@ -6,7 +6,7 @@
 Utility script to train the classical PINN with stabilized training defaults.
 
 Usage:
-> python -m scripts.train_classical --epochs 8000 --lbfgs
+> python scripts/train_classical.py --epochs 8000 --lbfgs
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ from collections import defaultdict
 import torch
 from torch import nn
 from tqdm import trange
-import numpy as np
 
 from src.classical.model import ClassicalPINN
 from src.common.losses import total_loss
@@ -30,7 +29,7 @@ from src.common.training_utils import (
     resample_collocation,
 )
 from src.common.utils import ensure_dir, get_device, set_seed
-from src.common.visualize import plot_error_map, plot_loss_curve, plot_prediction_heatmap, plot_snapshots, plot_exact_heatmap
+from src.common.visualize import plot_error_map, plot_loss_curve, plot_prediction_heatmap, plot_snapshots
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Train classical PINN with stabilized defaults.")
@@ -40,9 +39,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n_ic", type=int, default=400)
     p.add_argument("--n_bc", type=int, default=400)
     p.add_argument("--lr", type=float, default=1e-4, help="Lower default LR reduces second-derivative blow-ups.")
-    p.add_argument("--hidden_features", type=int, default=128)
-    p.add_argument("--hidden_layers", type=int, default=1)
-    p.add_argument("--activation", type=str, default="tanh", choices=["siren", "tanh", "relu"])
+    p.add_argument("--hidden_features", type=int, default=64)
+    p.add_argument("--hidden_layers", type=int, default=4)
+    p.add_argument("--activation", type=str, default="siren", choices=["siren", "tanh", "relu"])
     p.add_argument("--lbfgs", action="store_true", help="Run LBFGS after Adam if relative L2 is below threshold.")
     p.add_argument("--lbfgs_steps", type=int, default=500)
     p.add_argument("--lbfgs_max_rel_l2", type=float, default=0.5,
@@ -194,7 +193,7 @@ def main() -> None:
         if not torch.isfinite(losses["total"]) or _has_nan_params(model):
             print(f"\n[ERROR] NaN/Inf detected at epoch {epoch}. Stopping early.")
             print("[HINT] Try: --no-lra --no-causal_pde --grad_clip 0.5 --lr 5e-5")
-            return
+            break
 
         for k, v in losses.items():
             history[k].append(v.item())
@@ -261,9 +260,9 @@ def main() -> None:
         title="Classical PINN: Predicted u(x,t)",
         device=device,
     )
+
     plot_error_map(model, f"{args.out_dir}/classical_error_map.png", device=device)
     plot_snapshots(model, f"{args.out_dir}/classical_snapshots.png", device=device)
-    plot_exact_heatmap(f"{args.out_dir}/classical_exact_solution.png")
 
     print(f"[INFO] Final metrics: relative_l2={metrics['relative_l2']:.4e}, max_norm={metrics['max_norm']:.4e}")
     print(f"[INFO] Saved checkpoint + plots to {args.out_dir}/")
