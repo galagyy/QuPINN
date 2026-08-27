@@ -174,3 +174,12 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+# Results Folder
+/results
+
+# Outputs Folder
+/outputs
+
+# VS Code
+.vscode
