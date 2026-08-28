@@ -28,9 +28,7 @@ Our code follows conventions in previous PINN studies, where neural networks are
 The baseline solves the normalized wave equation, considering $c = 1$:
 
 $$
-\frac{\partial^2 u}{\partial t^2}
-- \frac{\partial^2 u}{\partial x^2} = 0,
-\qquad (x,t) \in [0,1] \times [0,1],
+\frac{\partial^2 u}{\partial t^2} = \frac{\partial^2 u}{\partial x^2}, \qquad (x,t) \in [0,1] \times [0,1],
 $$
 
 with homogeneous Dirichlet boundary conditions and the benchmark solution adapted from Dashtbayaz [[3](#reference-3)] for result comparisons:
