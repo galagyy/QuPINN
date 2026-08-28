@@ -6,6 +6,8 @@ A research codebase for comparing classical, hybrid, and quantum physics-informe
 
 The QuPINN project studies if quantum/hybrid physics-informed neural networks (PINNs) solve differential equations more efficiently than classical PINNs. The benchmark used is a simplified solution to the 1D Wave Equation for comparison.
 
+The study aims to make the study as reproducible as possible, keeping the domain, reference solution, collocation points, optimizer budget, random seeds, and evaluation grid fixed as a result. Quantum results will additionally report circuit depth, qubit count, shots, encoding, and simulator or hardware backend.
+
 ## Status
 
 Currently, the repository only contains the classical PINN algorithm and the common modules. The quantum/hybrid model and the overall comparison are still in progress.
@@ -46,9 +48,20 @@ $$
 
 The prescribed displacement and initial velocity are tracked by robust loss functions located in the ```common/``` directory. Spatial and temporal partial derivatives are obtained with PyTorch's automatic differentiation.
 
-## Classical PINN Configurations
+## PINN Configurations
 
-For the classical activation function, we chose a sin/SIREN option, motivated by its ability to represent signal-like functions with periodic activations. This allows for daptive loss balancing and causal weighting to be included in PINN stabilization techniques, as illustrated in Sitzmann's paper [[4](arXiv:2006.09661)].
+The comparison will use a 3 layer, feed forward network as outlined in Dashtbayaz's paper [[3](#reference-3)] with varying hidden layer widths for ease of comparison with the other two architectures.
+
+For the classical activation function, we chose a sin/SIREN option, motivated by its ability to represent signal-like functions with periodic activations. This allows for daptive loss balancing and causal weighting to be included in PINN stabilization techniques, as illustrated in Dashtbayaz's & Sitzmann's paper [[3](#reference-3), [4](#reference-4)].
+
+## Evaluation Metrics
+
+After training, models are evaluated on the following:
+
+- **relative $L^2$ error**: the normalized difference between the prediction function and $E(x,t)$
+- **maximum pointwise error**: $\|u_\theta-E\|_\infty$
+- **PDE residual loss**: the mean squared value of $\frac{\partial^2 u}{\partial t^2} - \frac{\partial^2 u}{\partial x^2}$ at collocation points.
+- **Total loss**: Aggregate loss from each loss component.
 
 ## Installation
 
