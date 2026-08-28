@@ -1,5 +1,31 @@
 # QuPINN
-> A comparison between a traditional PINN and a newer, Quantum PINN.
+
+A research codebase for comparing classical, hybrid, and quantum physics-informed neural networks.
+
+## Overview
+
+The QuPINN studies if quantum and hybrid neural-network ansatzes solve differential equations more efficiently than classical physics-informed neural networks (PINNs). The benchmark used is a simplified solution to the 1D Wave Equation for ease of comparison.
+
+## Status
+
+Currently, the repository only contains the classical PINN algorithm and the common modules. The quantum/hybrid model and the final comparison are still in progress.
+
+## Research question
+
+Under matched training configurations and an identical benchmark, how do classical, hybrid, and quantum models compare in:
+
+- solution accuracy 
+- PDE-residual reduction
+- parameter count and computational cost
+- training stability and sensitivity to collocation points
+
+Our code follows the broader PINN literature, where neural networks are trained to minimize violations of governing equations and initial/boundary conditions rather than relying only on labeled solution data [1, 2].
 
 ## License
-QuPINN is licensed under the **GNU AGPL 3.0 license,** a free, copyleft license published by the Free Software Foundation.
+
+QuPINN is licensed under the **GNU Affero General Public License v3.0**. See [LICENSE](LICENSE).
+
+## References
+
+1. M. Raissi, P. Perdikaris, and G. E. Karniadakis, “Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations,” *Journal of Computational Physics*, 378, 686-707, 2019. [doi:10.1016/j.jcp.2018.10.045](https://doi.org/10.1016/j.jcp.2018.10.045)
+2. G. E. Karniadakis et al., “Physics-informed machine learning,” *Nature Reviews Physics*, 3, 422-440, 2021. [doi:10.1038/s42254-021-00314-5](https://doi.org/10.1038/s42254-021-00314-5)
