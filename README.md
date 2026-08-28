@@ -4,22 +4,22 @@ A research codebase for comparing classical, hybrid, and quantum physics-informe
 
 ## Overview
 
-The QuPINN studies if quantum and hybrid neural-network ansatzes solve differential equations more efficiently than classical physics-informed neural networks (PINNs). The benchmark used is a simplified solution to the 1D Wave Equation for ease of comparison.
+The QuPINN project studies if quantum/hybrid neural-network ansatzes solve differential equations more efficiently than classical physics-informed neural networks (PINNs). The benchmark used is a simplified solution to the 1D Wave Equation for comparison.
 
 ## Status
 
-Currently, the repository only contains the classical PINN algorithm and the common modules. The quantum/hybrid model and the final comparison are still in progress.
+Currently, the repository only contains the classical PINN algorithm and the common modules. The quantum/hybrid model and the overall comparison are still in progress.
 
-## Research question
+## Research Question
 
 Under matched training configurations and an identical benchmark, how do classical, hybrid, and quantum models compare in:
 
 - solution accuracy 
-- PDE-residual reduction
-- parameter count and computational cost
-- training stability and sensitivity to collocation points
+- PDE-residual & loss reduction
+- parameter count & computational cost
+- training stability & sensitivity to collocation points
 
-Our code follows the broader PINN literature, where neural networks are trained to minimize violations of governing equations and initial/boundary conditions rather than relying only on labeled solution data [1, 2].
+Our code follows the broader PINN literature, where neural networks are trained to minimize violations of the benchmark equations and initial/boundary conditions rather than relying only on labeled solution data [[1](doi:10.1016/j.jcp.2018.10.045), [2](doi:10.1016/j.jcp.2018.10.045)].
 
 ## License
 
